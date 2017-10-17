@@ -1,6 +1,8 @@
 <?php
 /**
  * <p>Read a Google calendar and display text content in Bootstrap list-group.
+ * <p>Use the private url for your Google Calendar. Only day event counts and should not be overlaped or repeated.
+ * <p>Perfect for a store to tell visitors when it's open time.
  */
 class PluginGoogleOpening_v1{
   /**
@@ -22,6 +24,12 @@ class PluginGoogleOpening_v1{
      */
     if($data->get('data/google_calendar')){
       $calendar = PluginGoogleOpening_v1::getGoogleCalendar($data->get('data/google_calendar'));
+      if(sizeof($calendar->get('event')) == 0){
+        $element = array();
+        $element[] = wfDocument::createHtmlElement('p', 'Could not find any calendar events.');
+        wfDocument::renderElement($element);
+        return null;
+      }
       /**
        * 
        */
@@ -86,18 +94,26 @@ class PluginGoogleOpening_v1{
       wfPlugin::includeonce('i18n/translate_v1');
       $i18n = new PluginI18nTranslate_v1();
       /**
+       * Merge attribute for link.
+       */
+      $data->set('data/a_attribute', array_merge(array('class' => 'list-group-item'), $data->get('data/a_attribute')));
+      /**
        * Remove timecheck.
        */
       $shop->setUnset('timecheck');
       $element = array();
       $element[] = wfDocument::createHtmlElement('div', array(
-        wfDocument::createHtmlElement('div', array(
+        wfDocument::createHtmlElement('a', array(
           wfDocument::createHtmlElement('h4', $i18n->translateFromTheme($shop->get('end_text'))),
           wfDocument::createHtmlElement('p', $i18n->translateFromTheme($shop->get('end_description'), array('[end_time]' => $shop->get('end_time')))),
           wfDocument::createHtmlElement('p', $i18n->translateFromTheme($shop->get('next_description'), array('[next_days]' => $shop->get('next_days'), '[next_time]' => $shop->get('next_time'), '[next_hours]' => $shop->get('next_hours'))))
-        ), array('class' => 'list-group-item'))  
+        ), $data->get('data/a_attribute'))  
       ), array('class' => 'list-group'));
       
+      wfDocument::renderElement($element);
+    }else{
+      $element = array();
+      $element[] = wfDocument::createHtmlElement('p', 'Param google_calendar is not set in PluginGoogleOpening_v1 widget opening.');
       wfDocument::renderElement($element);
     }
   }
