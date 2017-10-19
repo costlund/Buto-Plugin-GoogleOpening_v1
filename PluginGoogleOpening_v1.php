@@ -104,7 +104,11 @@ class PluginGoogleOpening_v1{
       $element = array();
       $element[] = wfDocument::createHtmlElement('div', array(
         wfDocument::createHtmlElement('a', array(
-          wfDocument::createHtmlElement('h4', $i18n->translateFromTheme($shop->get('end_text'))),
+          wfDocument::createHtmlElement('h4', array(
+              wfDocument::createHtmlElement('text', $i18n->translateFromTheme($shop->get('end_text'))),
+              wfDocument::createHtmlElement('span', null, array('class' => 'glyphicon glyphicon-time info', 'style' => 'float:right'))
+              )
+          ),
           wfDocument::createHtmlElement('p', $i18n->translateFromTheme($shop->get('end_description'), array('[end_time]' => $shop->get('end_time')))),
           wfDocument::createHtmlElement('p', $i18n->translateFromTheme($shop->get('next_description'), array('[next_days]' => $shop->get('next_days'), '[next_time]' => $shop->get('next_time'), '[next_hours]' => $shop->get('next_hours'))))
         ), $data->get('data/a_attribute'))  
@@ -121,10 +125,32 @@ class PluginGoogleOpening_v1{
    * 
    */
   private static function getGoogleCalendar($google_calendar){
-    wfPlugin::includeonce('google/calendar');
-    $google = new PluginGoogleCalendar();
-    $google->filename = $google_calendar;
-    $google->init();
-    return new PluginWfArray($google->calendar);
+    if(wfFilesystem::isCache()){
+      $cache_file = 'plugin_google_opening_v1.cache';
+      if(wfFilesystem::fileExist(wfFilesystem::getCacheFolder().'/'.$cache_file)){
+        /**
+         * Cache exist.
+         * Get it.
+         */
+        return new PluginWfArray(wfFilesystem::getCacheFile(wfFilesystem::getCacheFolder().'/'.$cache_file));
+      }else{
+        /**
+         * Cache not exist.
+         * Load and create it.
+         */
+        wfPlugin::includeonce('google/calendar');
+        $google = new PluginGoogleCalendar();
+        $google->filename = $google_calendar;
+        $google->init();
+        wfFilesystem::saveFile(wfFilesystem::getCacheFolder().'/'.$cache_file, serialize($google->calendar));
+        return new PluginWfArray($google->calendar);
+      }
+    }else{
+      wfPlugin::includeonce('google/calendar');
+      $google = new PluginGoogleCalendar();
+      $google->filename = $google_calendar;
+      $google->init();
+      return new PluginWfArray($google->calendar);
+    }
   }
 }
