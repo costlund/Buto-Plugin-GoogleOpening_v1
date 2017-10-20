@@ -132,7 +132,7 @@ class PluginGoogleOpening_v1{
          * Cache exist.
          * Get it.
          */
-        return new PluginWfArray(wfFilesystem::getCacheFile(wfFilesystem::getCacheFolder().'/'.$cache_file));
+        return new PluginWfArray(wfFilesystem::getCacheFile($cache_file));
       }else{
         /**
          * Cache not exist.
