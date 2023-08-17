@@ -51,8 +51,8 @@ class PluginGoogleOpening_v1{
       foreach ($calendar->get('event') as $key => $value) {
         $item = new PluginWfArray($value);
         if($item->get('DTSTART')){
-          $start = strtotime(substr($item->get('DTSTART'), 0, 16));
-          $end = strtotime(substr($item->get('DTEND'), 0, 16));
+          $start = strtotime(wfPhpfunc::substr($item->get('DTSTART'), 0, 16));
+          $end = strtotime(wfPhpfunc::substr($item->get('DTEND'), 0, 16));
           if($start < $now && $end > $now){
             $shop->set('end', date('Y-m-d H:i:s', $end));
             $shop->set('end_hours', round(($end - $now)/60/60, 1));
